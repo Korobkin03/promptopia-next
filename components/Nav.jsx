@@ -2,15 +2,20 @@
 
 "use client";
 
+import UserImage from "./ui/UserImage";
+import SignIn from "./SignIn";
+import DropdownLink from "./ui/DropdownLink";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useSession, signIn, signOut, getProviders } from "next-auth";
+import { useSession, signOut, getProviders } from "next-auth";
 
 const Nav = () => {
   const isUserLoggedIn = true;
 
   const [providers, setProviders] = useState(null);
+  const [toggleDropdown, setToggleDropdown] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -46,29 +51,40 @@ const Nav = () => {
             </button>
 
             <Link href="/profile">
-              <Image
-                src="/assets/icons/user.svg"
-                width={37}
-                height={37}
-                className="rounded-full ring-2 ring-[#000] ring-opacity-80"
-                alt="user"
-              />
+              <UserImage />
             </Link>
           </div>
         ) : (
-          <>
-            {providers &&
-              Object.values(providers).map((provider) => (
+          <SignIn providers={providers} />
+        )}
+      </div>
+
+      {/* Mobile nav */}
+
+      <div className="sm:hidden flex relative">
+        {isUserLoggedIn ? (
+          <div className="flex">
+            <UserImage onClick={() => setToggleDropdown((prev) => !prev)} />
+
+            {toggleDropdown && (
+              <div className="dropdown">
+                <DropdownLink href="/profile" text="My profile" />
+                <DropdownLink href="/create-prompt" text="Create Prompt" />
                 <button
                   type="button"
-                  key={provider.name}
-                  onClick={() => signIn(provider.id)}
-                  className="black_btn"
+                  onClick={() => {
+                    setToggleDropdown(false);
+                    signOut();
+                  }}
+                  className="mt-5 w-full black_btn"
                 >
-                  Sign In
+                  Sign Out
                 </button>
-              ))}
-          </>
+              </div>
+            )}
+          </div>
+        ) : (
+          <SignIn providers={providers} />
         )}
       </div>
     </nav>
